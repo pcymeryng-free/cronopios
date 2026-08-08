@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1b5e20">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ficha Tenis">
+<title>Ficha de Tenis - Dobles</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+  :root{
+    --verde:#1b5e20;
+    --verde-claro:#2e7d32;
+    --naranja:#ff7a00;
+    --bg:#f5faf6;
+    --card:#ffffff;
+    --card2:#eef6f0;
+    --texto:#152016;
+    --texto-sec:#5b6f5e;
+    --borde:#d7e6da;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--texto);padding-bottom:100px;}
+  header{background:linear-gradient(135deg,var(--verde) 0%,var(--verde-claro) 100%);padding:20px 16px 24px;border-radius:0 0 24px 24px;box-shadow:0 4px 14px rgba(27,94,32,.18);}
+  header h1{margin:0;font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px;}
+  header p{margin:4px 0 0;font-size:12.5px;color:#d9ead9;}
+  main{padding:14px;max-width:640px;margin:0 auto;}
+  .card{background:var(--card);border:1px solid var(--borde);border-radius:16px;padding:14px;margin-bottom:14px;}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--texto-sec);margin:0 0 10px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .field{margin-bottom:10px;}
+  .field label{display:block;font-size:12px;color:var(--texto-sec);margin-bottom:4px;}
+  input[type=text],input[type=date],select,textarea{
+    width:100%;background:var(--card2);border:1px solid var(--borde);border-radius:10px;
+    color:var(--texto);padding:10px 12px;font-size:15px;font-family:inherit;
+  }
+  textarea{resize:vertical;min-height:52px;}
+  select{appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%235b6f5e" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');background-repeat:no-repeat;background-position:right 10px center;}
+  .players{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:2px;}
+  .players input{font-weight:600;}
+  .team-block{background:var(--card2);border:1px solid var(--borde);border-radius:12px;padding:10px;}
+  .team-block h3{margin:0 0 8px;font-size:12px;color:var(--texto-sec);text-transform:uppercase;letter-spacing:.03em;}
+  .team-block select{font-weight:600;margin-bottom:8px;}
+  .team-block select:last-of-type{margin-bottom:0;}
+  .otro-input{display:none;margin-top:-4px;margin-bottom:8px;}
+  .otro-input.show{display:block;}
+  .stat-row{border-top:1px solid var(--borde);padding:12px 0;}
+  .stat-row:first-of-type{border-top:none;padding-top:4px;}
+  .stat-label{font-size:13.5px;font-weight:600;margin-bottom:8px;color:var(--texto);}
+  .counters{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .counter{background:var(--card2);border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:center;}
+  .counter .who{font-size:10.5px;color:var(--texto-sec);text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .stepper{display:flex;align-items:center;gap:10px;}
+  .stepper button{
+    width:34px;height:34px;border-radius:50%;border:none;background:var(--verde-claro);color:#fff;
+    font-size:19px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;
+  }
+  .stepper button.minus{background:#3a3a3a;}
+  .stepper .val{font-size:20px;font-weight:700;min-width:26px;text-align:center;}
+  .tot{margin-top:6px;width:100%;}
+  .tot input{text-align:center;font-size:12px;padding:5px 6px;}
+  .tot label{font-size:9.5px;text-align:center;display:block;color:var(--texto-sec);margin-bottom:2px;}
+  .actions{
+    position:fixed;bottom:0;left:0;right:0;background:linear-gradient(0deg,var(--bg) 60%,rgba(15,26,16,0));
+    padding:14px 14px 18px;display:flex;gap:10px;max-width:640px;margin:0 auto;
+  }
+  .actions.wrap{position:static;background:none;padding:4px 0 0;}
+  btn, .btn{flex:1;}
+  .btn{
+    border:none;border-radius:14px;padding:14px 10px;font-size:15px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .btn-primary{background:#25D366;color:#06210f;}
+  .btn-secondary{background:var(--card2);color:var(--texto);border:1px solid var(--borde);flex:0 0 auto;padding:14px 16px;}
+  .toast{
+    position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#000c;color:#fff;
+    padding:10px 16px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50;
+  }
+  .toast.show{opacity:1;}
+  .install-tip{font-size:11.5px;color:var(--texto-sec);text-align:center;margin:6px 0 0;}
+  summary{cursor:pointer;font-size:12px;color:var(--texto-sec);margin-top:2px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎾 Ficha de Dobles</h1>
+  <p>Cargá la planilla durante el partido y enviala por WhatsApp al finalizar</p>
+</header>
+
+<main>
+
+  <div class="card">
+    <h2>Datos del partido</h2>
+    <div class="grid2">
+      <div class="field">
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha">
+      </div>
+      <div class="field">
+        <label for="rival">Rival</label>
+        <input type="text" id="rival" placeholder="Nombre del rival">
+      </div>
+      <div class="field">
+        <label for="prueba">Prueba</label>
+        <select id="prueba">
+          <option value="DC1">DC1 (Caballeros)</option>
+          <option value="DC2">DC2 (Caballeros)</option>
+          <option value="DM1">DM1 (Mixto)</option>
+          <option value="DM2">DM2 (Mixto)</option>
+          <option value="DD">DD (Damas)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="set">Set</label>
+        <select id="set">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="MTB">MTB (Match Tie-Break)</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label for="resultado">Resultado del set (ej: 6-4)</label>
+      <input type="text" id="resultado" placeholder="6-4">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Jugadores / Parejas</h2>
+    <div class="players">
+      <div class="team-block">
+        <h3>Pareja 1 · Cronopios</h3>
+        <select id="sel_j1p1"></select>
+        <input type="text" id="otro_j1p1" class="otro-input" placeholder="Nombre del jugador/a">
+        <select id="sel_j1p2"></select>
+        <input type="text" id="otro_j1p2" class="otro-input" placeholder="Nombre del jugador/a">
+      </div>
+      <div class="team-block">
+        <h3>Pareja 2 · La Lemusneta</h3>
+        <select id="sel_j2p1"></select>
+        <input type="text" id="otro_j2p1" class="otro-input" placeholder="Nombre del jugador/a">
+        <select id="sel_j2p2"></select>
+        <input type="text" id="otro_j2p2" class="otro-input" placeholder="Nombre del jugador/a">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Estadísticas</h2>
+    <div id="stats"></div>
+  </div>
+
+  <div class="card">
+    <h2>Observaciones</h2>
+    <textarea id="obs" placeholder="Notas del partido..."></textarea>
+  </div>
+
+  <div class="actions wrap">
+    <button class="btn btn-secondary" id="btnReset">🔄 Nueva</button>
+    <button class="btn btn-primary" id="btnWa">📲 Enviar por WhatsApp</button>
+  </div>
+  <p class="install-tip">Los datos se guardan solos en este celular. Tocá "Nueva" para empezar otra ficha.</p>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Lista de Buena Fe - Cronopios (Pareja 1). g: 'M' caballero, 'F' dama
+const ROSTER_CRONOPIOS = [
+  {name:'Agustin Brusco', g:'M'}, {name:'Analía Haissiner', g:'F'},
+  {name:'Bruno Nicolotti', g:'M'}, {name:'Diego Putallaz', g:'M'},
+  {name:'Dolo Fleitas', g:'F'}, {name:'Florencia Riom', g:'F'},
+  {name:'Gabriela Dorso', g:'F'}, {name:'Gustavo Brusco', g:'M'},
+  {name:'Maira González', g:'F'}, {name:'Marco Trombetta', g:'M'},
+  {name:'Martin Zuccardi', g:'M'}, {name:'Matias Gallego', g:'M'},
+  {name:'Pablo Cymeryng', g:'M'}, {name:'Sandra Forcher', g:'F'},
+  {name:'Santiago Brusco', g:'M'}, {name:'Santino Zuccardi', g:'M'},
+  {name:'Yamila Elias', g:'F'}, {name:'Yanina Bonet', g:'F'}
+];
+// Lista de Buena Fe - La Lemusneta (Pareja 2)
+const ROSTER_LEMUSNETA = [
+  {name:'Agustina Budani', g:'F'}, {name:'Clara Carpinacci', g:'F'},
+  {name:'Diego Trapes', g:'M'}, {name:'Federico Alzaga', g:'M'},
+  {name:'Florencia Bosso', g:'F'}, {name:'Gaston Gurevich', g:'M'},
+  {name:'Gonzalo Ruiz', g:'M'}, {name:'Ignacio Alzaga', g:'M'},
+  {name:'Ignacio Caraballo', g:'M'}, {name:'Javier Ortí', g:'M'},
+  {name:'Josefina Mucci', g:'F'}, {name:'Juan Manuel Ruiz', g:'M'},
+  {name:'Juan Martín Alzaga', g:'M'}, {name:'Lorena Delistovich', g:'F'},
+  {name:'Lucila Marzol', g:'F'}, {name:'María Gabriela Bianchi', g:'F'},
+  {name:'María Laura Leal Denis', g:'F'}, {name:'Mariano Benítez', g:'M'},
+  {name:'Mariano Flores', g:'M'}, {name:'Pablo Lemus', g:'M'},
+  {name:'Sabrina Abolsky', g:'F'}
+];
+const OTRO_VALUE = '__otro__';
+const PLAYER_SLOTS = ['j1p1','j1p2','j2p1','j2p2'];
+// A qué roster pertenece cada jugador de la ficha (según el equipo/pareja)
+const SLOT_ROSTER = {
+  j1p1: ROSTER_CRONOPIOS, j1p2: ROSTER_CRONOPIOS,
+  j2p1: ROSTER_LEMUSNETA, j2p2: ROSTER_LEMUSNETA
+};
+
+// Según la prueba, qué género se puede elegir en cada posición (p1 / p2 de cada pareja)
+function requiredGenderFor(slot){
+  const slotSuffix = slot.slice(2); // 'p1' o 'p2'
+  const prueba = state.prueba;
+  if(prueba === 'DC1' || prueba === 'DC2') return 'M';
+  if(prueba === 'DD') return 'F';
+  if(prueba === 'DM1' || prueba === 'DM2') return slotSuffix === 'p1' ? 'M' : 'F';
+  return null;
+}
+function genderLabel(g){
+  return g === 'M' ? 'caballero' : g === 'F' ? 'dama' : 'jugador/a';
+}
+
+const STATS = [
+  {key:'saque1_ad', label:'1° saque adentro'},
+  {key:'saque1_af', label:'1° saque afuera'},
+  {key:'saque2_ad', label:'2° saque adentro'},
+  {key:'ace', label:'Ace'},
+  {key:'doble_falta', label:'Doble falta'},
+  {key:'dev_juego', label:'Devolución en juego'},
+  {key:'err_dev', label:'Error de devolución'},
+  {key:'winner', label:'Winner'},
+  {key:'err_nf', label:'Error no forzado'},
+  {key:'volea_gan', label:'Volea ganadora'},
+  {key:'smash_gan', label:'Smash ganador'},
+  {key:'bp_gan', label:'Break points ganados'},
+  {key:'bp_perd', label:'Break points perdidos'},
+  {key:'gp_gan', label:'Game points ganados'},
+  {key:'gp_perd', label:'Game points perdidos'},
+  {key:'sp_gan', label:'Set points ganados'},
+  {key:'sp_perd', label:'Set points perdidos'},
+];
+
+const STORAGE_KEY = 'ficha_tenis_dobles_v1';
+
+const statsEl = document.getElementById('stats');
+let state = {};
+
+function defaultState(){
+  const s = {
+    fecha: new Date().toISOString().slice(0,10),
+    rival:'', prueba:'DC1', set:'1', resultado:'',
+    obs:''
+  };
+  PLAYER_SLOTS.forEach(slot=>{
+    s['sel_'+slot] = '';
+    s['otro_'+slot] = '';
+  });
+  STATS.forEach(st=>{
+    // Estadística individual por cada jugador de la Pareja 1 (no se registran stats de la Pareja 2)
+    s['j1a_'+st.key]=0; s['j1b_'+st.key]=0;
+    s['tot_j1a_'+st.key]=''; s['tot_j1b_'+st.key]='';
+  });
+  return s;
+}
+
+// Devuelve el nombre elegido para un jugador (del roster, o el escrito a mano si es "Otro")
+function playerName(slot){
+  const sel = state['sel_'+slot];
+  if(sel === OTRO_VALUE) return (state['otro_'+slot]||'').trim();
+  return sel || '';
+}
+
+function teamName(side){
+  const names = [playerName(side+'p1'), playerName(side+'p2')].filter(Boolean);
+  return names.join(' / ');
+}
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    state = raw ? Object.assign(defaultState(), JSON.parse(raw)) : defaultState();
+  }catch(e){ state = defaultState(); }
+}
+
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function renderStats(){
+  statsEl.innerHTML = STATS.map(st=>`
+    <div class="stat-row">
+      <div class="stat-label">${st.label}</div>
+      <div class="counters">
+        <div class="counter">
+          <div class="who" id="who-j1a-${st.key}">Jugador 1</div>
+          <div class="stepper">
+            <button type="button" class="minus" data-act="dec" data-key="j1a_${st.key}">−</button>
+            <div class="val" id="val-j1a_${st.key}">0</div>
+            <button type="button" data-act="inc" data-key="j1a_${st.key}">+</button>
+          </div>
+          <div class="tot">
+            <label>Total acumulado</label>
+            <input type="text" inputmode="numeric" id="tot_j1a_${st.key}" placeholder="-">
+          </div>
+        </div>
+        <div class="counter">
+          <div class="who" id="who-j1b-${st.key}">Jugador 2</div>
+          <div class="stepper">
+            <button type="button" class="minus" data-act="dec" data-key="j1b_${st.key}">−</button>
+            <div class="val" id="val-j1b_${st.key}">0</div>
+            <button type="button" data-act="inc" data-key="j1b_${st.key}">+</button>
+          </div>
+          <div class="tot">
+            <label>Total acumulado</label>
+            <input type="text" inputmode="numeric" id="tot_j1b_${st.key}" placeholder="-">
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  statsEl.querySelectorAll('button[data-act]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const key = btn.dataset.key;
+      const delta = btn.dataset.act === 'inc' ? 1 : -1;
+      state[key] = Math.max(0, (state[key]||0) + delta);
+      document.getElementById('val-'+key).textContent = state[key];
+      if(navigator.vibrate) navigator.vibrate(10);
+      save();
+    });
+  });
+
+  STATS.forEach(st=>{
+    ['tot_j1a_'+st.key, 'tot_j1b_'+st.key].forEach(id=>{
+      const el = document.getElementById(id);
+      el.addEventListener('input', ()=>{ state[id]=el.value; save(); });
+    });
+  });
+}
+
+function attachPlayerListeners(){
+  PLAYER_SLOTS.forEach(slot=>{
+    const sel = document.getElementById('sel_'+slot);
+    sel.addEventListener('change', ()=>{
+      state['sel_'+slot] = sel.value;
+      toggleOtro(slot);
+      updateWho();
+      save();
+    });
+
+    const otro = document.getElementById('otro_'+slot);
+    otro.addEventListener('input', ()=>{
+      state['otro_'+slot] = otro.value;
+      updateWho();
+      save();
+    });
+  });
+}
+
+// Repuebla las 4 listas de jugadores según la prueba elegida (DC=caballeros, DD=damas, DM=mixto).
+// Devuelve true si tuvo que vaciar alguna selección que dejó de ser válida.
+function renderPlayerSelects(){
+  let huboReseteo = false;
+
+  PLAYER_SLOTS.forEach(slot=>{
+    const roster = SLOT_ROSTER[slot];
+    const reqG = requiredGenderFor(slot);
+    const filtrados = roster.filter(p => !reqG || p.g === reqG);
+    const nombresValidos = filtrados.map(p=>p.name);
+
+    const actual = state['sel_'+slot];
+    if(actual && actual !== OTRO_VALUE && !nombresValidos.includes(actual)){
+      state['sel_'+slot] = '';
+      huboReseteo = true;
+    }
+
+    const optionsHtml = `<option value="">Seleccionar ${genderLabel(reqG)}...</option>` +
+      filtrados.map(p=>`<option value="${p.name}">${p.name}</option>`).join('') +
+      `<option value="${OTRO_VALUE}">✏️ Otro / Invitado</option>`;
+
+    const sel = document.getElementById('sel_'+slot);
+    sel.innerHTML = optionsHtml;
+    sel.value = state['sel_'+slot] || '';
+    toggleOtro(slot);
+  });
+
+  return huboReseteo;
+}
+
+function toggleOtro(slot){
+  const isOtro = state['sel_'+slot] === OTRO_VALUE;
+  document.getElementById('otro_'+slot).classList.toggle('show', isOtro);
+}
+
+function fillForm(){
+  document.getElementById('fecha').value = state.fecha;
+  document.getElementById('rival').value = state.rival;
+  document.getElementById('prueba').value = state.prueba;
+  document.getElementById('set').value = state.set;
+  document.getElementById('resultado').value = state.resultado;
+  document.getElementById('obs').value = state.obs;
+
+  PLAYER_SLOTS.forEach(slot=>{
+    document.getElementById('sel_'+slot).value = state['sel_'+slot] || '';
+    document.getElementById('otro_'+slot).value = state['otro_'+slot] || '';
+    toggleOtro(slot);
+  });
+
+  STATS.forEach(st=>{
+    document.getElementById('val-j1a_'+st.key).textContent = state['j1a_'+st.key]||0;
+    document.getElementById('val-j1b_'+st.key).textContent = state['j1b_'+st.key]||0;
+    document.getElementById('tot_j1a_'+st.key).value = state['tot_j1a_'+st.key]||'';
+    document.getElementById('tot_j1b_'+st.key).value = state['tot_j1b_'+st.key]||'';
+  });
+  updateWho();
+}
+
+function updateWho(){
+  const nA = playerName('j1p1') || 'Jugador 1';
+  const nB = playerName('j1p2') || 'Jugador 2';
+  STATS.forEach(st=>{
+    document.getElementById('who-j1a-'+st.key).textContent = nA;
+    document.getElementById('who-j1b-'+st.key).textContent = nB;
+  });
+}
+
+['fecha','rival','prueba','set','resultado','obs'].forEach(id=>{
+  document.addEventListener('input', (e)=>{
+    if(e.target && e.target.id === id){
+      state[id] = e.target.value;
+      save();
+    }
+  });
+  document.addEventListener('change', (e)=>{
+    if(e.target && e.target.id === id){
+      state[id] = e.target.value;
+      if(id === 'prueba'){
+        const huboReseteo = renderPlayerSelects();
+        updateWho();
+        if(huboReseteo) showToast('Se actualizó la lista de jugadores según la prueba');
+      }
+      save();
+    }
+  });
+});
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  if(confirm('¿Empezar una ficha nueva? Se borrarán los datos actuales de esta planilla.')){
+    state = defaultState();
+    localStorage.removeItem(STORAGE_KEY);
+    fillForm();
+    save();
+    showToast('Ficha reiniciada');
+  }
+});
+
+function shortName(name, fallback){
+  if(!name) return fallback;
+  return name.split(' ')[0].slice(0,7);
+}
+
+function buildMessage(){
+  const nA = playerName('j1p1') || 'Jugador 1';
+  const nB = playerName('j1p2') || 'Jugador 2';
+  const n2 = teamName('j2') || 'Pareja 2';
+  let lines = [];
+  lines.push('🎾 *FICHA DE DOBLES*');
+  lines.push(`📅 Fecha: ${state.fecha||'-'}`);
+  lines.push(`🆚 Rival: ${state.rival||'-'}`);
+  lines.push(`🏆 Prueba: ${state.prueba}   Set: ${state.set}   Resultado: ${state.resultado||'-'}`);
+  lines.push('');
+  lines.push(`*Pareja 1:* ${nA} / ${nB}`);
+  lines.push(`*Pareja 2:* ${n2}`);
+  lines.push('');
+  lines.push('```');
+  const pad = (s,n)=> (s.length>=n ? s.slice(0,n) : s + ' '.repeat(n-s.length));
+  const cA = shortName(nA, 'J1a');
+  const cB = shortName(nB, 'J1b');
+  lines.push(pad('Acción',23) + pad(cA,8) + cB);
+  STATS.forEach(st=>{
+    const vA = state['j1a_'+st.key]||0;
+    const vB = state['j1b_'+st.key]||0;
+    lines.push(pad(st.label,23) + pad(String(vA),8) + String(vB));
+  });
+  lines.push('```');
+  if(state.obs && state.obs.trim()){
+    lines.push('');
+    lines.push('📝 Observaciones:');
+    lines.push(state.obs.trim());
+  }
+  return lines.join('\n');
+}
+
+document.getElementById('btnWa').addEventListener('click', ()=>{
+  const text = buildMessage();
+  const url = 'https://wa.me/?text=' + encodeURIComponent(text);
+  window.open(url, '_blank');
+});
+
+// init
+load();
+attachPlayerListeners();
+renderPlayerSelects();
+renderStats();
+fillForm();
+
+// register service worker for offline use
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
